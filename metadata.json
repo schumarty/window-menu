@@ -1,0 +1,7 @@
+{
+	"shell-version": ["3.24"],
+	"uuid": "window-menu@schumarty.github.org",
+	"name": "Window Menu",
+	"version": 1,
+	"description": "Create menu showing open windows on the top panel"
+}
