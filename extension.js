@@ -4,8 +4,6 @@
  * is included in GNOME Shell.
  */
 
-const Lang = imports.lang;
-
 const Clutter = imports.gi.Clutter;
 const St = imports.gi.St;
 const Lang = imports.lang;
@@ -35,28 +33,35 @@ const windowMenu = new Lang.Class({
     hbox.add_child(PopupMenu.arrowIcon(St.Side.BOTTOM));
 
     this.actor.add_actor(hbox);
+
+    let section = new PopupMenu.PopupMenuSection();
+
+    this.menu.addMenuItem(section);
+  },
+
+  destroy: function() {
+    this.parent();
   },
 });
 
 function init() {
   // Nothing to do here right now
-}
+};
 
 // Track object when extension is enabled so we can remove it upon disable
 let _indicator;
 
 function enable() {
-  _indicator = new WindowMenu;
+  _indicator = new windowMenu();
 
   // Not sure how this interacts with other items with the same pos number
   let pos = 1;
   if ('apps-menu' in Main.panel.statusArea) {
     pos = 2;
   }
-  Mainpanel.addToStatusArea('window-menu', _indicator, pos, 'left');
-}
+  Main.panel.addToStatusArea('window-menu', _indicator, pos, 'left');
+};
 
 function disable() {
   _indicator.destroy();
-}
-  
+};
