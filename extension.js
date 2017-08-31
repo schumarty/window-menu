@@ -4,6 +4,8 @@
  * is included in GNOME Shell.
  */
 
+/* global imports */
+
 const Clutter = imports.gi.Clutter;
 const St = imports.gi.St;
 const Lang = imports.lang;
@@ -23,10 +25,9 @@ const MenuItem = new Lang.Class({
     this.parent();
     this._window = window;
 
-    this._label = new St.Label({ text: this._window.title });
-    this.actor.add_child(this._label);
+    const label = new St.Label({ text: this._window.title });
+    this.actor.add_child(label);
 
-    global.log('[window-menu]: title=' + this._window.title);
   },
 
   destroy: function() {
@@ -48,8 +49,8 @@ const WindowMenu = new Lang.Class({
     // I think this calls the constructor of the parent class but I'm not sure
     this.parent(0.0, _("Windows"));
 
-    let hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
-    let label = new St.Label({
+    const hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
+    const label = new St.Label({
       text: _("Windows"),
       y_expand: true,
       y_align: Clutter.ActorAlign.CENTER,
@@ -59,10 +60,12 @@ const WindowMenu = new Lang.Class({
 
     this.actor.add_actor(hbox);
 
-    global.screen.connect('restacked', Lang.bind(this, this._updateMenu));
+    this._stackEv =
+       global.screen.connect('restacked', Lang.bind(this, this._updateMenu));
   },
 
   destroy: function() {
+    global.screen.disconnect(this._stackEv);
     this.parent();
   },
 
@@ -73,20 +76,27 @@ const WindowMenu = new Lang.Class({
 
     let wkspWindows = global.screen.get_active_workspace().list_windows();
 
-    for (let i = 0; i < wkspWindows.length; i++) {
-      this.menu.addMenuItem(new MenuItem(wkspWindows[i]));
+    if (wkspWindows.length > 0) {
+      for (let i = 0; i < wkspWindows.length; i++) {
+        this.menu.addMenuItem(new MenuItem(wkspWindows[i]));
+      }
+    } else {
+      const emptyItem = new PopupMenu.PopupBaseMenuItem();
+      const label = new St.Label({ text: _("No Active Windows") });
+      emptyItem.actor.add_child(label);
+      this.menu.addMenuItem(emptyItem);
     }
   },
 });
 
-function init() {
+var init = function () {
   // Nothing to do here right now
-}
+};
 
 // Track object when extension is enabled so we can remove it upon disable
 let _indicator;
 
-function enable() {
+var enable = function () {
   _indicator = new WindowMenu();
 
   // Not sure how this interacts with other items with the same pos number
@@ -95,8 +105,8 @@ function enable() {
     pos = 2;
   }
   Main.panel.addToStatusArea('window-menu', _indicator, pos, 'left');
-}
+};
 
-function disable() {
+var disable = function() {
   _indicator.destroy();
-}
+};
