@@ -94,6 +94,8 @@ const WindowMenu = new Lang.Class({
       }
     } else {
       const emptyItem = new PopupMenu.PopupBaseMenuItem();
+      emptyItem.actor.add_style_class_name('no-windows-msg');
+
       const label = new St.Label({ text: _("No Active Windows") });
       emptyItem.actor.add_child(label);
       this.menu.addMenuItem(emptyItem);

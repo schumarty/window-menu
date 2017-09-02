@@ -3,5 +3,9 @@
 }
 
 .minimized {
-  color: #888;
+  color: #aaa;
+}
+
+.no-windows-msg {
+  font-style: italic;
 }
