@@ -75,7 +75,8 @@ const WindowMenu = new Lang.Class({
 
   _onAnEvent(actor, event) {
     if (event.type() === Clutter.EventType.TOUCH_BEGIN ||
-        event.type() === Clutter.EventType.BUTTON_PRESS) {
+        event.type() === Clutter.EventType.BUTTON_PRESS ||
+        event.type() === Clutter.EventType.KEY_RELEASE) {
       this._updateMenu();
     }
 
@@ -83,7 +84,6 @@ const WindowMenu = new Lang.Class({
   },
 
   _updateMenu() {
-
     this.menu.removeAll();
 
     const wkspWindows = global.screen.get_active_workspace().list_windows();
