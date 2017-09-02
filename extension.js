@@ -21,20 +21,27 @@ const MenuItem = new Lang.Class({
   Name: 'MenuItem',
   Extends: PopupMenu.PopupBaseMenuItem,
 
-  _init: function(window) {
+  _init(window) {
     this.parent();
     this._window = window;
 
+    if (window.minimized) {
+      this.actor.add_style_class_name('minimized');
+    }
+
+    if (global.display.focus_window === this._window) {
+      this.actor.add_style_class_name('focused');
+    }
+
     const label = new St.Label({ text: this._window.title });
     this.actor.add_child(label);
-
   },
 
-  destroy: function() {
+  destroy() {
     this.parent();
   },
 
-  activate: function(event) {
+  activate(event) {
     this._window.activate(global.get_current_time());
 
     this.parent(event);
@@ -45,8 +52,7 @@ const WindowMenu = new Lang.Class({
   Name: 'WindowMenu',
   Extends: PanelMenu.Button,
 
-  _init: function() {
-    // I think this calls the constructor of the parent class but I'm not sure
+  _init() {
     this.parent(0.0, _("Windows"));
 
     const hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
@@ -60,21 +66,27 @@ const WindowMenu = new Lang.Class({
 
     this.actor.add_actor(hbox);
 
-    this._stackEv =
-       global.screen.connect('restacked', Lang.bind(this, this._updateMenu));
+    this.actor.connect('event', Lang.bind(this, this._onAnEvent));
   },
 
-  destroy: function() {
-    global.screen.disconnect(this._stackEv);
+  destroy() {
     this.parent();
   },
 
-  _updateMenu: function() {
-    global.log('[window-menu]: updating menu');
+  _onAnEvent(actor, event) {
+    if (event.type() === Clutter.EventType.TOUCH_BEGIN ||
+        event.type() === Clutter.EventType.BUTTON_PRESS) {
+      this._updateMenu();
+    }
+
+    return Clutter.EVENT_PROPAGATE;
+  },
+
+  _updateMenu() {
 
     this.menu.removeAll();
 
-    let wkspWindows = global.screen.get_active_workspace().list_windows();
+    const wkspWindows = global.screen.get_active_workspace().list_windows();
 
     if (wkspWindows.length > 0) {
       for (let i = 0; i < wkspWindows.length; i++) {
