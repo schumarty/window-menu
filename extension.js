@@ -37,14 +37,7 @@ const MenuItem = new Lang.Class({
         const label = new St.Label({ text: this._window.title });
         this.actor.add_child(label);
 
-        if (window.minimized) {
-            this.actor.add_style_class_name('minimized');
-            this._icon.opacity = 128;
-        }
-
-        if (global.display.focus_window === this._window) {
-            this.actor.add_style_class_name('focused');
-        }
+        this._applyStyles();
     },
 
     destroy() {
@@ -55,6 +48,17 @@ const MenuItem = new Lang.Class({
         this._window.activate(global.get_current_time());
 
         this.parent(event);
+    },
+
+    _applyStyles() {
+        if (this._window.minimized) {
+            this.actor.add_style_class_name('minimized');
+            this._icon.opacity = 128;
+        }
+
+        if (global.display.focus_window === this._window) {
+            this.actor.add_style_class_name('focused');
+        }
     },
 });
 
