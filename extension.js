@@ -18,6 +18,8 @@ const PopupMenu = imports.ui.popupMenu;
 const Gettext = imports.gettext.domain('window-menu');
 const _ = Gettext.gettext;
 
+const PLACEMENT_POSITION = 2;
+
 const MenuItem = new Lang.Class({
     Name: 'MenuItem',
     Extends: PopupMenu.PopupBaseMenuItem,
@@ -106,12 +108,7 @@ let _indicator;
 var enable = function () {
     _indicator = new WindowMenu();
 
-    // Not sure how this interacts with other items with the same pos number
-    let pos = 1;
-    if ('apps-menu' in Main.panel.statusArea) {
-        pos = 2;
-    }
-    Main.panel.addToStatusArea('window-menu', _indicator, pos, 'left');
+    Main.panel.addToStatusArea('window-menu', _indicator, PLACEMENT_POSITION, 'left');
 };
 
 var disable = function() {
