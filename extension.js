@@ -10,6 +10,7 @@
 const Clutter = imports.gi.Clutter;
 const St = imports.gi.St;
 const Lang = imports.lang;
+const Shell = imports.gi.Shell;
 
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
@@ -18,7 +19,8 @@ const PopupMenu = imports.ui.popupMenu;
 const Gettext = imports.gettext.domain('window-menu');
 const _ = Gettext.gettext;
 
-const PLACEMENT_POSITION = 2;
+const MENU_PLACEMENT_POSITION = 1;
+const ICON_SIZE = 16;
 
 const MenuItem = new Lang.Class({
     Name: 'MenuItem',
@@ -27,17 +29,22 @@ const MenuItem = new Lang.Class({
     _init(window) {
         this.parent();
         this._window = window;
+        this._windowApp = Shell.WindowTracker.get_default().get_window_app(this._window);
+
+        this._icon = this._windowApp.create_icon_texture(ICON_SIZE);
+        this.actor.add_child(this._icon);
+
+        const label = new St.Label({ text: this._window.title });
+        this.actor.add_child(label);
 
         if (window.minimized) {
             this.actor.add_style_class_name('minimized');
+            this._icon.opacity = 128;
         }
 
         if (global.display.focus_window === this._window) {
             this.actor.add_style_class_name('focused');
         }
-
-        const label = new St.Label({ text: this._window.title });
-        this.actor.add_child(label);
     },
 
     destroy() {
@@ -108,7 +115,7 @@ let _indicator;
 var enable = function () {
     _indicator = new WindowMenu();
 
-    Main.panel.addToStatusArea('window-menu', _indicator, PLACEMENT_POSITION, 'left');
+    Main.panel.addToStatusArea('window-menu', _indicator, MENU_PLACEMENT_POSITION, 'left');
 };
 
 var disable = function() {
