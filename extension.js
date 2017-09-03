@@ -66,21 +66,13 @@ const WindowMenu = new Lang.Class({
 
     this.actor.add_actor(hbox);
 
-    this.actor.connect('event', Lang.bind(this, this._onAnEvent));
+    this._updateMenu();
+
+    this.menu.connect('open-state-changed', Lang.bind(this, this._updateMenu));
   },
 
   destroy() {
     this.parent();
-  },
-
-  _onAnEvent(actor, event) {
-    if (event.type() === Clutter.EventType.TOUCH_BEGIN ||
-        event.type() === Clutter.EventType.BUTTON_PRESS ||
-        event.type() === Clutter.EventType.KEY_RELEASE) {
-      this._updateMenu();
-    }
-
-    return Clutter.EVENT_PROPAGATE;
   },
 
   _updateMenu() {
