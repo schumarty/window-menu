@@ -1,9 +1,3 @@
-/*
-  * First attempt at creating an extension for GNOME, not totally sure what I'm
-  * doin here. Code is mosty coppied over from the 'places-menu' extension which
-  * is included in GNOME Shell.
-  */
-
 /* eslint indent: ["error", 4] */
 /* global imports */
 
@@ -113,7 +107,6 @@ var init = function () {
     // Nothing to do here right now
 };
 
-// Track object when extension is enabled so we can remove it upon disable
 let _indicator;
 
 var enable = function () {
