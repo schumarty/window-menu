@@ -74,16 +74,22 @@ const WindowMenu = new Lang.Class({
 
         this.actor.add_actor(hbox);
 
+        // Won't work without this - I think we must first create a menu
+        // in order to have something to connect the signal to
         this._updateMenu();
 
-        this.menu.connect('open-state-changed', Lang.bind(this, this._updateMenu));
+        this.menu.connect('open-state-changed', Lang.bind(this, this._onOpenMenu));
+
+        this._restack = global.screen.connect('restacked', Lang.bind(this, this._onRestack));
     },
 
     destroy() {
+        global.disconnect(this._restack);
         this.parent();
     },
 
     _updateMenu() {
+        global.log("[Menu List]: updating menu!");
         this.menu.removeAll();
 
         const wkspWindows = global.screen.get_active_workspace().list_windows();
@@ -101,9 +107,19 @@ const WindowMenu = new Lang.Class({
             this.menu.addMenuItem(emptyItem);
         }
     },
+
+    _onOpenMenu() {
+        if (this.menu.isOpen) this._updateMenu();
+    },
+
+    _onRestack() {
+        // Refresh menu if windows change while menu is open
+        if (this.menu.isOpen) this._updateMenu();
+    },
 });
 
-var init = function () {
+/* eslint-disable no-var, no-unused-vars */
+var init = function() {
     // Nothing to do here right now
 };
 
