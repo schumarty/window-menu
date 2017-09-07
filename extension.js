@@ -15,10 +15,11 @@ const _ = Gettext.gettext;
 
 const MENU_PLACEMENT_POSITION = 1;
 const ICON_SIZE = 16;
+const MAX_TITLE_LENGTH = 100;
 const SORT_TYPE = 'appName';
 
-const sortMenuItemsBy = {
-    orderOpened(a, b) {
+const _sortMenuItemsBy = {
+    stableSequence(a, b) {
         return a._window.get_stable_sequence() - b._window.get_stable_sequence();
     },
 
@@ -26,6 +27,13 @@ const sortMenuItemsBy = {
         return a._windowApp.get_name().toLowerCase().localeCompare(
                b._windowApp.get_name().toLowerCase());
     },
+};
+
+const _truncateString = function(string, maxLength) {
+    if (string.length > maxLength) {
+        return `${string.substring(0, maxLength)}...`;
+    }
+    return string;
 };
 
 const MenuItem = new Lang.Class({
@@ -40,7 +48,9 @@ const MenuItem = new Lang.Class({
         this._icon = this._windowApp.create_icon_texture(ICON_SIZE);
         this.actor.add_child(this._icon);
 
-        const label = new St.Label({ text: this._window.title });
+        const label = new St.Label({
+            text: _truncateString(this._window.title, MAX_TITLE_LENGTH),
+        });
         this.actor.add_child(label);
 
         this._applyStyles();
@@ -113,7 +123,7 @@ const WindowMenu = new Lang.Class({
                 menuItems.push(new MenuItem(wkspWindows[i]));
             }
 
-            menuItems.sort(sortMenuItemsBy[SORT_TYPE]);
+            menuItems.sort(_sortMenuItemsBy[SORT_TYPE]);
 
             for (let i = 0; i < menuItems.length; i++) {
                 this.menu.addMenuItem(menuItems[i]);
