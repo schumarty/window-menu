@@ -15,13 +15,17 @@ const _ = Gettext.gettext;
 
 const MENU_PLACEMENT_POSITION = 1;
 const ICON_SIZE = 16;
-const SORT_TYPE = 'orderOpened';
+const SORT_TYPE = 'appName';
 
-const sortWindowsBy = {
+const sortMenuItemsBy = {
     orderOpened(a, b) {
-        return a.get_stable_sequence() - b.get_stable_sequence();
+        return a._window.get_stable_sequence() - b._window.get_stable_sequence();
     },
 
+    appName(a, b) {
+        return a._windowApp.get_name().toLowerCase().localeCompare(
+               b._windowApp.get_name().toLowerCase());
+    },
 };
 
 const MenuItem = new Lang.Class({
@@ -90,24 +94,29 @@ const WindowMenu = new Lang.Class({
 
         this.menu.connect('open-state-changed', Lang.bind(this, this._onOpenMenu));
 
-        this._restack = global.screen.connect('restacked', Lang.bind(this, this._onRestack));
+        this._restackId = global.screen.connect('restacked', Lang.bind(this, this._onRestack));
     },
 
     destroy() {
-        global.disconnect(this._restack);
+        global.disconnect(this._restackId);
         this.parent();
     },
 
     _updateMenu() {
-        global.log("[Menu List]: updating menu!");
         this.menu.removeAll();
 
         const wkspWindows = global.screen.get_active_workspace().list_windows();
-        wkspWindows.sort(sortWindowsBy[SORT_TYPE]);
 
         if (wkspWindows.length > 0) {
+            const menuItems = [];
             for (let i = 0; i < wkspWindows.length; i++) {
-                this.menu.addMenuItem(new MenuItem(wkspWindows[i]));
+                menuItems.push(new MenuItem(wkspWindows[i]));
+            }
+
+            menuItems.sort(sortMenuItemsBy[SORT_TYPE]);
+
+            for (let i = 0; i < menuItems.length; i++) {
+                this.menu.addMenuItem(menuItems[i]);
             }
         } else {
             const emptyItem = new PopupMenu.PopupBaseMenuItem();
