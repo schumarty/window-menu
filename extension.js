@@ -39,6 +39,8 @@ const MenuItem = new Lang.Class({
     },
 
     activate(event) {
+        if (Main.overview.visible) Main.overview.hide();
+
         this._window.activate(global.get_current_time());
 
         this.parent(event);
