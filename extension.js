@@ -15,6 +15,14 @@ const _ = Gettext.gettext;
 
 const MENU_PLACEMENT_POSITION = 1;
 const ICON_SIZE = 16;
+const SORT_TYPE = 'orderOpened';
+
+const sortWindowsBy = {
+    orderOpened(a, b) {
+        return a.get_stable_sequence() - b.get_stable_sequence();
+    },
+
+};
 
 const MenuItem = new Lang.Class({
     Name: 'MenuItem',
@@ -95,6 +103,7 @@ const WindowMenu = new Lang.Class({
         this.menu.removeAll();
 
         const wkspWindows = global.screen.get_active_workspace().list_windows();
+        wkspWindows.sort(sortWindowsBy[SORT_TYPE]);
 
         if (wkspWindows.length > 0) {
             for (let i = 0; i < wkspWindows.length; i++) {
