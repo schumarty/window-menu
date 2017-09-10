@@ -120,7 +120,11 @@ const WindowMenu = new Lang.Class({
         if (wkspWindows.length > 0) {
             const menuItems = [];
             for (let i = 0; i < wkspWindows.length; i++) {
-                menuItems.push(new MenuItem(wkspWindows[i]));
+                // 0 represents the 'normal' MetaWindowType. This keeps
+                // the desktop, dock, etc from being in our list.
+                if (wkspWindows[i].get_window_type() === 0) {
+                    menuItems.push(new MenuItem(wkspWindows[i]));
+                }
             }
 
             menuItems.sort(_sortMenuItemsBy[SORT_TYPE]);
