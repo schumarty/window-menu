@@ -1,6 +1,7 @@
 {
 	"shell-version": ["3.24"],
-	"uuid": "window-menu@schumarty.github.org",
+	"uuid": "window-menu@schumarty.github.io",
+	"settings-schema": "org.gnome.shell.extensions.window-menu",
 	"name": "Window Menu",
 	"version": 1,
 	"description": "Create menu showing open windows on the top panel"

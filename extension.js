@@ -16,17 +16,20 @@ const _ = Gettext.gettext;
 const MENU_PLACEMENT_POSITION = 1;
 const ICON_SIZE = 16;
 const MAX_TITLE_LENGTH = 100;
-const SORT_TYPE = 'appName';
+const SORT_TYPE = 'stableSequence';
+const SHOW_ICONS = true;
 
 const _sortMenuItemsBy = {
     stableSequence(a, b) {
         return a._window.get_stable_sequence() - b._window.get_stable_sequence();
     },
 
+    /* eslint-disable indent */
     appName(a, b) {
         return a._windowApp.get_name().toLowerCase().localeCompare(
                b._windowApp.get_name().toLowerCase());
     },
+    /* eslint-enable indent */
 };
 
 const _truncateString = function(string, maxLength) {
@@ -45,8 +48,10 @@ const MenuItem = new Lang.Class({
         this._window = window;
         this._windowApp = Shell.WindowTracker.get_default().get_window_app(this._window);
 
-        this._icon = this._windowApp.create_icon_texture(ICON_SIZE);
-        this.actor.add_child(this._icon);
+        if (SHOW_ICONS) {
+            this._icon = this._windowApp.create_icon_texture(ICON_SIZE);
+            this.actor.add_child(this._icon);
+        }
 
         const label = new St.Label({
             text: _truncateString(this._window.title, MAX_TITLE_LENGTH),
@@ -71,7 +76,7 @@ const MenuItem = new Lang.Class({
     _applyStyles() {
         if (this._window.minimized) {
             this.actor.add_style_class_name('minimized');
-            this._icon.opacity = 128;
+            if (SHOW_ICONS) this._icon.opacity = 128;
         }
 
         if (global.display.focus_window === this._window) {
