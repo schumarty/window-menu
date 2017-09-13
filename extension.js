@@ -10,6 +10,10 @@ const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+const Convenience = Me.imports.convenience;
+
 const Gettext = imports.gettext.domain('window-menu');
 const _ = Gettext.gettext;
 
@@ -45,6 +49,9 @@ const MenuItem = new Lang.Class({
 
     _init(window) {
         this.parent();
+
+        this._settings = Convenience.getSettings();
+
         this._window = window;
         this._windowApp = Shell.WindowTracker.get_default().get_window_app(this._window);
 
@@ -91,6 +98,8 @@ const WindowMenu = new Lang.Class({
 
     _init() {
         this.parent(0.0, _("Windows"));
+
+        this._settings = Convenience.getSettings();
 
         const hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
         const label = new St.Label({

@@ -1,0 +1,19 @@
+<schemalist>
+	<schema id="org.gnome.shell.extensions.window-menu" path="/org/gnome/shell/extensions/window-menu/">
+		<key name="show-icons" type="b">
+			<default>true</default>
+			<summary>Show icons</summary>
+			<description>Shows application icon next to the window title in the menu</description>
+		</key>
+		<key name="menu-placement-position" type="i">
+			<default>1</default>
+			<summary>Placement postion on top panel</summary>
+			<description>An integer value determining where the menu is placed in the left box of the top panel</description>
+		</key>
+		<key name="max-title-length" type="i">
+			<default>70</default>
+			<summary>Max length of title for menu item</summary>
+			<description>Determines the length beyond which a window title will be truncated and appended with an elipsis</description>
+		</key>
+	</schema>
+</schemalist>
