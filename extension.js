@@ -17,11 +17,7 @@ const Convenience = Me.imports.convenience;
 const Gettext = imports.gettext.domain('window-menu');
 const _ = Gettext.gettext;
 
-const MENU_PLACEMENT_POSITION = 1;
 const ICON_SIZE = 16;
-const MAX_TITLE_LENGTH = 100;
-const SORT_TYPE = 'stableSequence';
-const SHOW_ICONS = true;
 
 const _sortMenuItemsBy = {
     stableSequence(a, b) {
@@ -55,13 +51,13 @@ const MenuItem = new Lang.Class({
         this._window = window;
         this._windowApp = Shell.WindowTracker.get_default().get_window_app(this._window);
 
-        if (SHOW_ICONS) {
+        if (this._settings.get_boolean('show-icons')) {
             this._icon = this._windowApp.create_icon_texture(ICON_SIZE);
             this.actor.add_child(this._icon);
         }
 
         const label = new St.Label({
-            text: _truncateString(this._window.title, MAX_TITLE_LENGTH),
+            text: _truncateString(this._window.title, this._settings.get_int("max-title-length")),
         });
         this.actor.add_child(label);
 
@@ -83,7 +79,7 @@ const MenuItem = new Lang.Class({
     _applyStyles() {
         if (this._window.minimized) {
             this.actor.add_style_class_name('minimized');
-            if (SHOW_ICONS) this._icon.opacity = 128;
+            if (this._settings.get_boolean('show-icons')) this._icon.opacity = 128;
         }
 
         if (global.display.focus_window === this._window) {
@@ -141,7 +137,7 @@ const WindowMenu = new Lang.Class({
                 }
             }
 
-            menuItems.sort(_sortMenuItemsBy[SORT_TYPE]);
+            menuItems.sort(_sortMenuItemsBy[this._settings.get_string('sort-type')]);
 
             for (let i = 0; i < menuItems.length; i++) {
                 this.menu.addMenuItem(menuItems[i]);
@@ -175,8 +171,9 @@ let _indicator;
 
 var enable = function () {
     _indicator = new WindowMenu();
+    const _settings = Convenience.getSettings();
 
-    Main.panel.addToStatusArea('window-menu', _indicator, MENU_PLACEMENT_POSITION, 'left');
+    Main.panel.addToStatusArea('window-menu', _indicator, _settings.get_int("menu-placement-position"), 'left');
 };
 
 var disable = function() {

@@ -1,5 +1,14 @@
 <schemalist>
+	<enum id="org.gnome.shell.extensions.window-menu.sort-type">
+		<value value="0" nick="stableSequence"/>
+		<value value="1" nick="appName"/>
+	</enum>
 	<schema id="org.gnome.shell.extensions.window-menu" path="/org/gnome/shell/extensions/window-menu/">
+		<key name="sort-type" enum="org.gnome.shell.extensions.window-menu.sort-type">
+			<default>'stableSequence'</default>
+			<summary>Sorting criteria for menu</summary>
+			<description>This chooses the means by which the list of active windows will be sorted</description>
+		</key>
 		<key name="show-icons" type="b">
 			<default>true</default>
 			<summary>Show icons</summary>
@@ -11,7 +20,7 @@
 			<description>An integer value determining where the menu is placed in the left box of the top panel</description>
 		</key>
 		<key name="max-title-length" type="i">
-			<default>70</default>
+			<default>72</default>
 			<summary>Max length of title for menu item</summary>
 			<description>Determines the length beyond which a window title will be truncated and appended with an elipsis</description>
 		</key>
