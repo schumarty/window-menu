@@ -22,23 +22,29 @@ const ExtPrefsWidget = new GObject.Class({
 
         this.margin = 12;
         this.row_spacing = 6;
+        this.column_spacing = 6;
         this.orientation = Gtk.Orientation.VERTICAL;
 
         this._settings = Convenience.getSettings();
 
-        const iconGrid = new Gtk.Grid({
-            orientation: Gtk.Orientation.HORIZONTAL,
-            column_spacing: 6,
+        const iconLabel = new Gtk.Label({
+            label: _("Show Icons"),
+            halign: Gtk.Align.START,
+            hexpand: true,
         });
-        const iconLabel = new Gtk.Label({ label: _("Show Icons") });
-        const iconSwitch = new Gtk.Switch();
+        const iconSwitch = new Gtk.Switch({
+            halign: Gtk.Align.END,
+            hexpand: true,
+        });
         this._settings.bind('show-icons', iconSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
-        iconGrid.add(iconSwitch);
-        iconGrid.add(iconLabel);
-        this.add(iconGrid);
+        this.attach(iconLabel, 0, 0, 1, 1);
+        this.attach(iconSwitch, 1, 0, 1, 1);
 
-        const titleGrid = new Gtk.Grid({ orientation: Gtk.Orientation.HORIZONTAL });
-        const titleLabel = new Gtk.Label({ label: _("Maximum Title Length") });
+        const titleLabel = new Gtk.Label({
+            label: _("Maximum Title Length"),
+            halign: Gtk.Align.START,
+            hexpand: true,
+        });
         const titleAdjustment = new Gtk.Adjustment({
             value: 1.0,
             lower: 1.0,
@@ -51,11 +57,12 @@ const ExtPrefsWidget = new GObject.Class({
             adjustment: titleAdjustment,
             climb_rate: 0.0,
             digits: 0,
+            halign: Gtk.Align.END,
+            hexpand: true,
         });
         this._settings.bind('max-title-length', titleSpin, 'value', Gio.SettingsBindFlags.DEFAULT);
-        iconGrid.add(titleSpin);
-        iconGrid.add(titleLabel);
-        this.add(titleGrid);
+        this.attach(titleLabel, 0, 1, 1, 1);
+        this.attach(titleSpin, 1, 1, 1, 1);
     },
 });
 
