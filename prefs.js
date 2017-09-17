@@ -21,13 +21,41 @@ const ExtPrefsWidget = new GObject.Class({
         this.parent(params);
 
         this.margin = 12;
+        this.row_spacing = 6;
         this.orientation = Gtk.Orientation.VERTICAL;
 
         this._settings = Convenience.getSettings();
 
-        const iconCheck = new Gtk.CheckButton({ label: _("Show Icons") });
-        this._settings.bind('show-icons', iconCheck, 'active', Gio.SettingsBindFlags.DEFAULT);
-        this.add(iconCheck);
+        const iconGrid = new Gtk.Grid({
+            orientation: Gtk.Orientation.HORIZONTAL,
+            column_spacing: 6,
+        });
+        const iconLabel = new Gtk.Label({ label: _("Show Icons") });
+        const iconSwitch = new Gtk.Switch();
+        this._settings.bind('show-icons', iconSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
+        iconGrid.add(iconSwitch);
+        iconGrid.add(iconLabel);
+        this.add(iconGrid);
+
+        const titleGrid = new Gtk.Grid({ orientation: Gtk.Orientation.HORIZONTAL });
+        const titleLabel = new Gtk.Label({ label: _("Maximum Title Length") });
+        const titleAdjustment = new Gtk.Adjustment({
+            value: 1.0,
+            lower: 1.0,
+            upper: 1000.0,
+            step_increment: 1.0,
+            page_increment: 5.0,
+            page_size: 0.0,
+        });
+        const titleSpin = new Gtk.SpinButton({
+            adjustment: titleAdjustment,
+            climb_rate: 0.0,
+            digits: 0,
+        });
+        this._settings.bind('max-title-length', titleSpin, 'value', Gio.SettingsBindFlags.DEFAULT);
+        iconGrid.add(titleSpin);
+        iconGrid.add(titleLabel);
+        this.add(titleGrid);
     },
 });
 
