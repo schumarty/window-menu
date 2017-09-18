@@ -20,13 +20,14 @@ const ExtPrefsWidget = new GObject.Class({
     _init(params) {
         this.parent(params);
 
-        this.margin = 12;
+        this.margin = 24;
         this.row_spacing = 6;
         this.column_spacing = 6;
         this.orientation = Gtk.Orientation.VERTICAL;
 
         this._settings = Convenience.getSettings();
 
+        // Icon Switch
         const iconLabel = new Gtk.Label({
             label: _("Show Icons"),
             halign: Gtk.Align.START,
@@ -40,6 +41,7 @@ const ExtPrefsWidget = new GObject.Class({
         this.attach(iconLabel, 0, 0, 1, 1);
         this.attach(iconSwitch, 1, 0, 1, 1);
 
+        // Title Truncation Length Setting
         const titleLabel = new Gtk.Label({
             label: _("Maximum Title Length"),
             halign: Gtk.Align.START,
@@ -63,6 +65,39 @@ const ExtPrefsWidget = new GObject.Class({
         this._settings.bind('max-title-length', titleSpin, 'value', Gio.SettingsBindFlags.DEFAULT);
         this.attach(titleLabel, 0, 1, 1, 1);
         this.attach(titleSpin, 1, 1, 1, 1);
+
+        // Horizontal Line
+        const hLine = new Gtk.Separator({ orientation: Gtk.Orientation.HORIZONTAL });
+        this.attach(hLine, 0, 2, 2, 1);
+
+        // Sorting Options Radio Buttons
+        const sortLabel = new Gtk.Label({
+            label: _("Sorting method for windows:"),
+            halign: Gtk.Align.START,
+            hexpand: true,
+        });
+
+        const stableRadio = new Gtk.RadioButton({
+            label: _("Stable Sequence: order in which windows were opened"),
+        });
+        stableRadio.connect('toggled', (radio) => {
+            if (radio.active) this._settings.set_string('sort-type', 'stableSequence');
+        });
+
+        const appRadio = new Gtk.RadioButton({
+            label: _("App Name: name of application inside window"),
+            group: stableRadio,
+        });
+        appRadio.connect('toggled', (radio) => {
+            if (radio.active) this._settings.set_string('sort-type', 'appName');
+        });
+
+        const activeRadio = this._settings.get_string('sort-type');
+        if (activeRadio === 'appName') appRadio.active = true;
+
+        this.attach(sortLabel, 0, 3, 2, 1);
+        this.attach(stableRadio, 0, 4, 2, 1);
+        this.attach(appRadio, 0, 5, 2, 1);
     },
 });
 
