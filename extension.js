@@ -40,8 +40,37 @@ const _truncateString = function(string, maxLength) {
     return string;
 };
 
-const MenuItem = new Lang.Class({
-    Name: 'MenuItem',
+const WkspMenuItem = new Lang.Class({
+    Name: 'WkspMenuItem',
+    Extends: PopupMenu.PopupBaseMenuItem,
+
+    _init(wksp) {
+        this.parent();
+
+        this._wksp = wksp;
+        this._indexNum = wksp.index();
+
+        const label = new St.Label({
+            text: `Workspace ${this._indexNum}`,
+        });
+        this.actor.add_child(label);
+    },
+
+    destroy() {
+        this.parent();
+    },
+
+    activate(event) {
+        if (Main.overview.visible) Main.overview.hide();
+
+        this._wksp.activate(global.get_current_time());
+
+        this.parent(event);
+    },
+});
+
+const WindowMenuItem = new Lang.Class({
+    Name: 'WindowMenuItem',
     Extends: PopupMenu.PopupBaseMenuItem,
 
     _init(window) {
@@ -122,13 +151,21 @@ const WindowMenu = new Lang.Class({
     _updateMenu() {
         this.menu.removeAll();
 
+        const nWorkspaces = global.screen.n_workspaces;
+        for (let i = 0; i < nWorkspaces; i++) {
+            const wkspItem = new WkspMenuItem(global.screen.get_workspace_by_index(i));
+            this.menu.addMenuItem(wkspItem);
+        }
+
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
         const wkspWindows = global.screen.get_active_workspace().list_windows();
 
         if (wkspWindows.length > 0) {
             const menuItems = [];
             for (let i = 0; i < wkspWindows.length; i++) {
                 if (!wkspWindows[i].skip_taskbar) {
-                    menuItems.push(new MenuItem(wkspWindows[i]));
+                    menuItems.push(new WindowMenuItem(wkspWindows[i]));
                 }
             }
 
