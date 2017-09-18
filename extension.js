@@ -17,6 +17,7 @@ const Convenience = Me.imports.convenience;
 const Gettext = imports.gettext.domain('window-menu');
 const _ = Gettext.gettext;
 
+const _settings = Convenience.getSettings();
 const ICON_SIZE = 16;
 
 const _sortMenuItemsBy = {
@@ -46,18 +47,16 @@ const MenuItem = new Lang.Class({
     _init(window) {
         this.parent();
 
-        this._settings = Convenience.getSettings();
-
         this._window = window;
         this._windowApp = Shell.WindowTracker.get_default().get_window_app(this._window);
 
-        if (this._settings.get_boolean('show-icons')) {
+        if (_settings.get_boolean('show-icons')) {
             this._icon = this._windowApp.create_icon_texture(ICON_SIZE);
             this.actor.add_child(this._icon);
         }
 
         const label = new St.Label({
-            text: _truncateString(this._window.title, this._settings.get_int("max-title-length")),
+            text: _truncateString(this._window.title, _settings.get_int("max-title-length")),
         });
         this.actor.add_child(label);
 
@@ -79,7 +78,7 @@ const MenuItem = new Lang.Class({
     _applyStyles() {
         if (this._window.minimized) {
             this.actor.add_style_class_name('minimized');
-            if (this._settings.get_boolean('show-icons')) this._icon.opacity = 128;
+            if (_settings.get_boolean('show-icons')) this._icon.opacity = 128;
         }
 
         if (global.display.focus_window === this._window) {
@@ -94,8 +93,6 @@ const WindowMenu = new Lang.Class({
 
     _init() {
         this.parent(0.0, _("Windows"));
-
-        this._settings = Convenience.getSettings();
 
         const hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
         const label = new St.Label({
@@ -118,7 +115,7 @@ const WindowMenu = new Lang.Class({
     },
 
     destroy() {
-        global.disconnect(this._restackId);
+        global.screen.disconnect(this._restackId);
         this.parent();
     },
 
@@ -135,7 +132,7 @@ const WindowMenu = new Lang.Class({
                 }
             }
 
-            menuItems.sort(_sortMenuItemsBy[this._settings.get_string('sort-type')]);
+            menuItems.sort(_sortMenuItemsBy[_settings.get_string('sort-type')]);
 
             for (let i = 0; i < menuItems.length; i++) {
                 this.menu.addMenuItem(menuItems[i]);
@@ -160,20 +157,29 @@ const WindowMenu = new Lang.Class({
     },
 });
 
+let _indicator;
+let _posChangeId;
+
+const _placeMenu = function() {
+    if ('window-menu' in Main.panel.statusArea) _indicator.destroy();
+    _indicator = new WindowMenu();
+
+    const position = _settings.get_int('menu-placement-position');
+    Main.panel.addToStatusArea('window-menu', _indicator, position, 'left');
+};
+
 /* eslint-disable no-var, no-unused-vars */
 var init = function() {
     // Nothing to do here right now
 };
 
-let _indicator;
-
 var enable = function () {
-    _indicator = new WindowMenu();
-    const _settings = Convenience.getSettings();
+    _posChangeId = _settings.connect('changed::menu-placement-position', Lang.bind(this, _placeMenu));
 
-    Main.panel.addToStatusArea('window-menu', _indicator, _settings.get_int("menu-placement-position"), 'left');
+    _placeMenu();
 };
 
 var disable = function() {
     _indicator.destroy();
+    _settings.disconnect(_posChangeId);
 };
