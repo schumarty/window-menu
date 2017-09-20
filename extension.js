@@ -54,6 +54,8 @@ const WkspMenuItem = new Lang.Class({
             text: `Workspace ${this._indexNum}`,
         });
         this.actor.add_child(label);
+
+        this._applyStyles();
     },
 
     destroy() {
@@ -66,6 +68,12 @@ const WkspMenuItem = new Lang.Class({
         this._wksp.activate(global.get_current_time());
 
         this.parent(event);
+    },
+
+    _applyStyles() {
+        if (global.screen.get_active_workspace_index() === this._indexNum) {
+            this.actor.add_style_class_name('focused');
+        }
     },
 });
 
@@ -151,13 +159,15 @@ const WindowMenu = new Lang.Class({
     _updateMenu() {
         this.menu.removeAll();
 
-        const nWorkspaces = global.screen.n_workspaces;
-        for (let i = 0; i < nWorkspaces; i++) {
-            const wkspItem = new WkspMenuItem(global.screen.get_workspace_by_index(i));
-            this.menu.addMenuItem(wkspItem);
-        }
+        if (_settings.get_boolean('show-workspaces')) {
+            const nWorkspaces = global.screen.n_workspaces;
+            for (let i = 0; i < nWorkspaces; i++) {
+                const wkspItem = new WkspMenuItem(global.screen.get_workspace_by_index(i));
+                this.menu.addMenuItem(wkspItem);
+            }
 
-        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+            this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        }
 
         const wkspWindows = global.screen.get_active_workspace().list_windows();
 

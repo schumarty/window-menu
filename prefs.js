@@ -27,6 +27,20 @@ const ExtPrefsWidget = new GObject.Class({
 
         this._settings = Convenience.getSettings();
 
+        // Workspaces Switch
+        const wkspLabel = new Gtk.Label({
+            label: _("List Workspaces"),
+            halign: Gtk.Align.START,
+            hexpand: true,
+        });
+        const wkspSwitch = new Gtk.Switch({
+            halign: Gtk.Align.END,
+            hexpand: true,
+        });
+        this._settings.bind('show-workspaces', wkspSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
+        this.attach(wkspLabel, 0, 0, 1, 1);
+        this.attach(wkspSwitch, 1, 0, 1, 1);
+
         // Icon Switch
         const iconLabel = new Gtk.Label({
             label: _("Show Icons"),
@@ -38,8 +52,8 @@ const ExtPrefsWidget = new GObject.Class({
             hexpand: true,
         });
         this._settings.bind('show-icons', iconSwitch, 'active', Gio.SettingsBindFlags.DEFAULT);
-        this.attach(iconLabel, 0, 0, 1, 1);
-        this.attach(iconSwitch, 1, 0, 1, 1);
+        this.attach(iconLabel, 0, 1, 1, 1);
+        this.attach(iconSwitch, 1, 1, 1, 1);
 
         // Title Truncation Length Setting
         const titleLabel = new Gtk.Label({
@@ -63,8 +77,8 @@ const ExtPrefsWidget = new GObject.Class({
             hexpand: true,
         });
         this._settings.bind('max-title-length', titleSpin, 'value', Gio.SettingsBindFlags.DEFAULT);
-        this.attach(titleLabel, 0, 1, 1, 1);
-        this.attach(titleSpin, 1, 1, 1, 1);
+        this.attach(titleLabel, 0, 2, 1, 1);
+        this.attach(titleSpin, 1, 2, 1, 1);
 
         // Menu Placement Position Setting
         const posLabel = new Gtk.Label({
@@ -88,12 +102,12 @@ const ExtPrefsWidget = new GObject.Class({
             hexpand: true,
         });
         this._settings.bind('menu-placement-position', posSpin, 'value', Gio.SettingsBindFlags.DEFAULT);
-        this.attach(posLabel, 0, 2, 1, 1);
-        this.attach(posSpin, 1, 2, 1, 1);
+        this.attach(posLabel, 0, 3, 1, 1);
+        this.attach(posSpin, 1, 3, 1, 1);
 
         // Horizontal Line
         const hLine = new Gtk.Separator({ orientation: Gtk.Orientation.HORIZONTAL });
-        this.attach(hLine, 0, 3, 2, 1);
+        this.attach(hLine, 0, 4, 2, 1);
 
         // Sorting Options Radio Buttons
         const sortLabel = new Gtk.Label({
@@ -120,9 +134,9 @@ const ExtPrefsWidget = new GObject.Class({
         const activeRadio = this._settings.get_string('sort-type');
         if (activeRadio === 'appName') appRadio.active = true;
 
-        this.attach(sortLabel, 0, 4, 2, 1);
-        this.attach(stableRadio, 0, 5, 2, 1);
-        this.attach(appRadio, 0, 6, 2, 1);
+        this.attach(sortLabel, 0, 5, 2, 1);
+        this.attach(stableRadio, 0, 6, 2, 1);
+        this.attach(appRadio, 0, 7, 2, 1);
     },
 });
 
