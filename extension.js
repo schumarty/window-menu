@@ -206,6 +206,8 @@ const WindowMenu = new Lang.Class({
 
 let _indicator;
 let _posChangeId;
+let _oldBoxLength;
+let _currentBoxLength;
 
 const _placeMenu = function() {
     if ('window-menu' in Main.panel.statusArea) _indicator.destroy();
@@ -213,6 +215,16 @@ const _placeMenu = function() {
 
     const position = _settings.get_int('menu-placement-position');
     Main.panel.addToStatusArea('window-menu', _indicator, position, 'left');
+
+    _oldBoxLength = Main.panel._leftBox.get_children().length;
+
+    _indicator.actor.connect('allocate', () => {
+        _currentBoxLength = Main.panel._leftBox.get_children().length;
+        if (_currentBoxLength !== _oldBoxLength) {
+            _oldBoxLength = _currentBoxLength;
+            _placeMenu();
+        }
+    });
 };
 
 /* eslint-disable no-var, no-unused-vars */
@@ -222,7 +234,6 @@ var init = function() {
 
 var enable = function () {
     _posChangeId = _settings.connect('changed::menu-placement-position', Lang.bind(this, _placeMenu));
-
     _placeMenu();
 };
 
