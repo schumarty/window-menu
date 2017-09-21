@@ -40,6 +40,30 @@ const _truncateString = function(string, maxLength) {
     return string;
 };
 
+const EmptyMenuItem = new Lang.Class({
+    Name: 'EmptyMenuItem',
+    Extends: PopupMenu.PopupBaseMenuItem,
+
+    _init(wksp) {
+        this.parent();
+
+        this._wksp = wksp;
+
+        const label = new St.Label({ text: _("No Active Windows") });
+        this.actor.add_child(label);
+
+        this.actor.add_style_class_name('no-windows-msg');
+    },
+
+    activate(event) {
+        if (Main.overview.visible) Main.overview.hide();
+
+        this._wksp.activate(global.get_current_time());
+
+        this.parent(event);
+    },
+});
+
 const WkspMenuItem = new Lang.Class({
     Name: 'WkspMenuItem',
     Extends: PopupMenu.PopupBaseMenuItem,
@@ -160,19 +184,24 @@ const WindowMenu = new Lang.Class({
         this.menu.removeAll();
 
         if (_settings.get_boolean('show-workspaces')) {
-            const nWorkspaces = global.screen.n_workspaces;
-            for (let i = 0; i < nWorkspaces; i++) {
-                const wkspItem = new WkspMenuItem(global.screen.get_workspace_by_index(i));
-                this.menu.addMenuItem(wkspItem);
-            }
+            this._addWorkspaces();
 
             this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
         }
 
-        const wkspWindows = global.screen.get_active_workspace().list_windows();
+        const activeWksp = global.screen.get_active_workspace();
+        const menuItems = this._getWindowsFrom(activeWksp);
+
+        for (let i = 0; i < menuItems.length; i++) {
+            this.menu.addMenuItem(menuItems[i]);
+        }
+    },
+
+    _getWindowsFrom(workspace) {
+        const wkspWindows = workspace.list_windows();
+        const menuItems = [];
 
         if (wkspWindows.length > 0) {
-            const menuItems = [];
             for (let i = 0; i < wkspWindows.length; i++) {
                 if (!wkspWindows[i].skip_taskbar) {
                     menuItems.push(new WindowMenuItem(wkspWindows[i]));
@@ -180,17 +209,18 @@ const WindowMenu = new Lang.Class({
             }
 
             menuItems.sort(_sortMenuItemsBy[_settings.get_string('sort-type')]);
-
-            for (let i = 0; i < menuItems.length; i++) {
-                this.menu.addMenuItem(menuItems[i]);
-            }
         } else {
-            const emptyItem = new PopupMenu.PopupBaseMenuItem();
-            emptyItem.actor.add_style_class_name('no-windows-msg');
+            menuItems.push(new EmptyMenuItem(workspace));
+        }
 
-            const label = new St.Label({ text: _("No Active Windows") });
-            emptyItem.actor.add_child(label);
-            this.menu.addMenuItem(emptyItem);
+        return menuItems;
+    },
+
+    _addWorkspaces() {
+        const nWorkspaces = global.screen.n_workspaces;
+        for (let i = 0; i < nWorkspaces; i++) {
+            const wkspItem = new WkspMenuItem(global.screen.get_workspace_by_index(i));
+            this.menu.addMenuItem(wkspItem);
         }
     },
 
