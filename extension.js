@@ -189,11 +189,21 @@ const WindowMenu = new Lang.Class({
             this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
         }
 
-        const activeWksp = global.screen.get_active_workspace();
-        const menuItems = this._getWindowsFrom(activeWksp);
+        const wkspCount = global.screen.n_workspaces;
+        const activeWkspNum = global.screen.get_active_workspace_index();
 
-        for (let i = 0; i < menuItems.length; i++) {
-            this.menu.addMenuItem(menuItems[i]);
+        for (let wkspNum = 0; wkspNum < wkspCount; wkspNum++) {
+            const workspace = global.screen.get_workspace_by_index(wkspNum);
+            const menuItems = this._getWindowsFrom(workspace);
+            const labelText = _("Workspace %d").format(wkspNum);
+            const subMenu = new PopupMenu.PopupSubMenuMenuItem(labelText, true);
+
+            for (let i = 0; i < menuItems.length; i++) {
+                subMenu.menu.addMenuItem(menuItems[i]);
+            }
+
+            this.menu.addMenuItem(subMenu);
+            if (activeWkspNum === wkspNum) subMenu.activate();
         }
     },
 
