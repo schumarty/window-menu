@@ -204,40 +204,42 @@ const WindowMenu = new Lang.Class({
     },
 });
 
-let _indicator;
-let _posChangeId;
-let _oldBoxLength;
-let _currentBoxLength;
 
-const _placeMenu = function() {
-    if ('window-menu' in Main.panel.statusArea) _indicator.destroy();
-    _indicator = new WindowMenu();
+const ExtensionApi = new Lang.Class({
+    Name: 'ExtensionApi',
 
-    const position = _settings.get_int('menu-placement-position');
-    Main.panel.addToStatusArea('window-menu', _indicator, position, 'left');
+    enable() {
+        this._posChangeId = _settings.connect('changed::menu-placement-position', Lang.bind(this, this._placeMenu));
+        this._placeMenu();
+    },
 
-    _oldBoxLength = Main.panel._leftBox.get_children().length;
+    _placeMenu() {
+        if ('window-menu' in Main.panel.statusArea) this._indicator.destroy();
+        this._indicator = new WindowMenu();
 
-    _indicator.actor.connect('allocate', () => {
-        _currentBoxLength = Main.panel._leftBox.get_children().length;
-        if (_currentBoxLength !== _oldBoxLength) {
-            _oldBoxLength = _currentBoxLength;
-            _placeMenu();
+        const position = _settings.get_int('menu-placement-position');
+        Main.panel.addToStatusArea('window-menu', this._indicator, position, 'left');
+
+        this._oldBoxLength = Main.panel._leftBox.get_children().length;
+
+        this._indicator.actor.connect('allocate', Lang.bind(this, this._onAllocate));
+    },
+
+    _onAllocate() {
+        this._currentBoxLength = Main.panel._leftBox.get_children().length;
+        if (this._currentBoxLength !== this._oldBoxLength) {
+            this._oldBoxLength = this._currentBoxLength;
+            this._placeMenu();
         }
-    });
-};
+    },
+
+    disable() {
+        this._indicator.destroy();
+        _settings.disconnect(this._posChangeId);
+    },
+});
 
 /* eslint-disable no-var, no-unused-vars */
 var init = function() {
-    // Nothing to do here right now
-};
-
-var enable = function () {
-    _posChangeId = _settings.connect('changed::menu-placement-position', Lang.bind(this, _placeMenu));
-    _placeMenu();
-};
-
-var disable = function() {
-    _indicator.destroy();
-    _settings.disconnect(_posChangeId);
+    return new ExtensionApi();
 };
