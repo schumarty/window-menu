@@ -9,3 +9,7 @@
 .no-windows-msg {
   font-style: italic;
 }
+
+.static-width-menu {
+  width: 20em;
+}

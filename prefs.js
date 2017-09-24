@@ -55,31 +55,6 @@ const ExtPrefsWidget = new GObject.Class({
         this.attach(iconLabel, 0, 1, 1, 1);
         this.attach(iconSwitch, 1, 1, 1, 1);
 
-        // Title Truncation Length Setting
-        const titleLabel = new Gtk.Label({
-            label: _("Maximum Title Length"),
-            halign: Gtk.Align.START,
-            hexpand: true,
-        });
-        const titleAdjustment = new Gtk.Adjustment({
-            value: 1.0,
-            lower: 1.0,
-            upper: 1000.0,
-            step_increment: 1.0,
-            page_increment: 5.0,
-            page_size: 0.0,
-        });
-        const titleSpin = new Gtk.SpinButton({
-            adjustment: titleAdjustment,
-            climb_rate: 0.0,
-            digits: 0,
-            halign: Gtk.Align.END,
-            hexpand: true,
-        });
-        this._settings.bind('max-title-length', titleSpin, 'value', Gio.SettingsBindFlags.DEFAULT);
-        this.attach(titleLabel, 0, 2, 1, 1);
-        this.attach(titleSpin, 1, 2, 1, 1);
-
         // Menu Placement Position Setting
         const posLabel = new Gtk.Label({
             label: _("Menu Placement Position"),

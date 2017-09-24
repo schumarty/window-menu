@@ -2,9 +2,10 @@
 /* global imports */
 
 const Clutter = imports.gi.Clutter;
-const St = imports.gi.St;
 const Lang = imports.lang;
+const Meta = imports.gi.Meta;
 const Shell = imports.gi.Shell;
+const St = imports.gi.St;
 
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
@@ -19,26 +20,6 @@ const _ = Gettext.gettext;
 
 const _settings = Convenience.getSettings();
 const ICON_SIZE = 16;
-
-const _sortMenuItemsBy = {
-    stableSequence(a, b) {
-        return a._window.get_stable_sequence() - b._window.get_stable_sequence();
-    },
-
-    /* eslint-disable indent */
-    appName(a, b) {
-        return a._windowApp.get_name().toLowerCase().localeCompare(
-               b._windowApp.get_name().toLowerCase());
-    },
-    /* eslint-enable indent */
-};
-
-const _truncateString = function(string, maxLength) {
-    if (string.length > maxLength) {
-        return `${string.substring(0, maxLength)}...`;
-    }
-    return string;
-};
 
 const EmptyMenuItem = new Lang.Class({
     Name: 'EmptyMenuItem',
@@ -64,43 +45,6 @@ const EmptyMenuItem = new Lang.Class({
     },
 });
 
-const WkspMenuItem = new Lang.Class({
-    Name: 'WkspMenuItem',
-    Extends: PopupMenu.PopupBaseMenuItem,
-
-    _init(wksp) {
-        this.parent();
-
-        this._wksp = wksp;
-        this._indexNum = wksp.index();
-
-        const label = new St.Label({
-            text: `Workspace ${this._indexNum}`,
-        });
-        this.actor.add_child(label);
-
-        this._applyStyles();
-    },
-
-    destroy() {
-        this.parent();
-    },
-
-    activate(event) {
-        if (Main.overview.visible) Main.overview.hide();
-
-        this._wksp.activate(global.get_current_time());
-
-        this.parent(event);
-    },
-
-    _applyStyles() {
-        if (global.screen.get_active_workspace_index() === this._indexNum) {
-            this.actor.add_style_class_name('focused');
-        }
-    },
-});
-
 const WindowMenuItem = new Lang.Class({
     Name: 'WindowMenuItem',
     Extends: PopupMenu.PopupBaseMenuItem,
@@ -117,7 +61,7 @@ const WindowMenuItem = new Lang.Class({
         }
 
         const label = new St.Label({
-            text: _truncateString(this._window.title, _settings.get_int("max-title-length")),
+            text: this._window.title,
         });
         this.actor.add_child(label);
 
@@ -173,6 +117,8 @@ const WindowMenu = new Lang.Class({
         this.menu.connect('open-state-changed', Lang.bind(this, this._onOpenMenu));
 
         this._restackId = global.screen.connect('restacked', Lang.bind(this, this._onRestack));
+
+        this.menu.actor.add_style_class_name('static-width-menu');
     },
 
     destroy() {
@@ -184,26 +130,32 @@ const WindowMenu = new Lang.Class({
         this.menu.removeAll();
 
         if (_settings.get_boolean('show-workspaces')) {
-            this._addWorkspaces();
+            const wkspCount = global.screen.n_workspaces;
+            const activeWkspNum = global.screen.get_active_workspace_index();
 
-            this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        }
+            for (let wkspNum = 0; wkspNum < wkspCount; wkspNum++) {
+                const workspace = global.screen.get_workspace_by_index(wkspNum);
+                const menuItems = this._getWindowsFrom(workspace);
+                const labelText = Meta.prefs_get_workspace_name(wkspNum);
+                const subMenu = new PopupMenu.PopupSubMenuMenuItem(labelText, true);
 
-        const wkspCount = global.screen.n_workspaces;
-        const activeWkspNum = global.screen.get_active_workspace_index();
+                for (let i = 0; i < menuItems.length; i++) {
+                    subMenu.menu.addMenuItem(menuItems[i]);
+                }
 
-        for (let wkspNum = 0; wkspNum < wkspCount; wkspNum++) {
-            const workspace = global.screen.get_workspace_by_index(wkspNum);
-            const menuItems = this._getWindowsFrom(workspace);
-            const labelText = _("Workspace %d").format(wkspNum);
-            const subMenu = new PopupMenu.PopupSubMenuMenuItem(labelText, true);
+                this.menu.addMenuItem(subMenu);
+                if (activeWkspNum === wkspNum) {
+                    subMenu.setOrnament(PopupMenu.Ornament.DOT);
+                    subMenu.activate();
+                }
+            }
+        } else {
+            const activeWksp = global.screen.get_active_workspace();
+            const menuItems = this._getWindowsFrom(activeWksp);
 
             for (let i = 0; i < menuItems.length; i++) {
-                subMenu.menu.addMenuItem(menuItems[i]);
+                this.menu.addMenuItem(menuItems[i]);
             }
-
-            this.menu.addMenuItem(subMenu);
-            if (activeWkspNum === wkspNum) subMenu.activate();
         }
     },
 
@@ -218,7 +170,7 @@ const WindowMenu = new Lang.Class({
                 }
             }
 
-            menuItems.sort(_sortMenuItemsBy[_settings.get_string('sort-type')]);
+            menuItems.sort(this._sortMenuItemsBy[_settings.get_string('sort-type')]);
         } else {
             menuItems.push(new EmptyMenuItem(workspace));
         }
@@ -226,12 +178,17 @@ const WindowMenu = new Lang.Class({
         return menuItems;
     },
 
-    _addWorkspaces() {
-        const nWorkspaces = global.screen.n_workspaces;
-        for (let i = 0; i < nWorkspaces; i++) {
-            const wkspItem = new WkspMenuItem(global.screen.get_workspace_by_index(i));
-            this.menu.addMenuItem(wkspItem);
-        }
+    _sortMenuItemsBy: {
+        stableSequence(a, b) {
+            return a._window.get_stable_sequence() - b._window.get_stable_sequence();
+        },
+
+        /* eslint-disable indent */
+        appName(a, b) {
+            return a._windowApp.get_name().toLowerCase().localeCompare(
+                   b._windowApp.get_name().toLowerCase());
+        },
+        /* eslint-enable indent */
     },
 
     _onOpenMenu() {
