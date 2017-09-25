@@ -19,6 +19,11 @@
 			<summary>Show workspaces</summary>
 			<description>List workspaces above the list of active windows</description>
 		</key>
+		<key name="menu-width" type="i">
+			<default>20</default>
+			<summary>Width of menu in em</summary>
+			<description>An integer used to set a fixed width for the menu measued in em</description>
+		</key>
 		<key name="menu-placement-position" type="i">
 			<default>1</default>
 			<summary>Placement postion on top panel</summary>

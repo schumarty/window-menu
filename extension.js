@@ -117,8 +117,6 @@ const WindowMenu = new Lang.Class({
         this.menu.connect('open-state-changed', Lang.bind(this, this._onOpenMenu));
 
         this._restackId = global.screen.connect('restacked', Lang.bind(this, this._onRestack));
-
-        this.menu.actor.add_style_class_name('static-width-menu');
     },
 
     destroy() {
@@ -128,6 +126,7 @@ const WindowMenu = new Lang.Class({
 
     _updateMenu() {
         this.menu.removeAll();
+        this.menu.actor.style = `width: ${_settings.get_int('menu-width')}em;`;
 
         if (_settings.get_boolean('show-workspaces')) {
             const wkspCount = global.screen.n_workspaces;
