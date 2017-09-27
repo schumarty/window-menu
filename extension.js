@@ -126,7 +126,6 @@ const WindowMenu = new Lang.Class({
 
     _updateMenu() {
         this.menu.removeAll();
-        this.menu.actor.style = `width: ${_settings.get_int('menu-width')}em;`;
 
         if (_settings.get_boolean('show-workspaces')) {
             const wkspCount = global.screen.n_workspaces;
@@ -191,8 +190,9 @@ const WindowMenu = new Lang.Class({
     },
 
     /**
-     * The signal handler function of the parent is overriding the custom
-     * width set above. We fix this by modifying the signal handler.
+     * This customizes the signal handler called from the parent class. The
+     * parent resets this.menu.actor.style whenever the menu is closed so we
+     * add our custom styles after that takes place.
      */
     _onOpenStateChanged(menu, open) {
         this.parent(menu, open);
