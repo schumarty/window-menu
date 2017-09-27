@@ -190,6 +190,15 @@ const WindowMenu = new Lang.Class({
         /* eslint-enable indent */
     },
 
+    /**
+     * The signal handler function of the parent is overriding the custom
+     * width set above. We fix this by modifying the signal handler.
+     */
+    _onOpenStateChanged(menu, open) {
+        this.parent(menu, open);
+        this.menu.actor.style += `width: ${_settings.get_int('menu-width')}em;`;
+    },
+
     _onOpenMenu() {
         if (this.menu.isOpen) this._updateMenu();
     },
